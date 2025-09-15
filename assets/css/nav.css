@@ -1,0 +1,65 @@
+
+/* Top Navigation – matches dark purple style */
+:root {
+  --nav-bg: #0f172a;
+  --nav-card: #0e162b;
+  --nav-accent-1: #5b5bd6;
+  --nav-accent-2: #7c4dff;
+  --nav-border: rgba(255,255,255,.08);
+  --nav-text: #e9edfa;
+  --nav-muted: #9fb0de;
+}
+.pg-topbar {
+  position: sticky; top: 0; z-index: 50;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(11,15,31,.85), rgba(15,20,48,.85));
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--nav-border);
+}
+.pg-topbar .inner {
+  max-width: 1280px; margin: 0 auto;
+  display: grid; grid-template-columns: auto 1fr auto;
+  gap: 16px; align-items: center;
+  padding: 12px 18px;
+}
+.pg-brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  color: var(--nav-text); text-decoration: none; font-weight: 800;
+  letter-spacing: .2px; font-size: 20px;
+}
+.pg-brand .logo {
+  width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--nav-accent-1), var(--nav-accent-2));
+  box-shadow: 0 8px 20px rgba(124,77,255,.35);
+  color: #fff; font-size: 18px;
+}
+.pg-nav {
+  display: flex; gap: 20px; align-items: center;
+}
+.pg-nav a {
+  color: var(--nav-muted); text-decoration: none; font-weight: 600; font-size: 14px;
+  padding: 8px 4px; border-radius: 8px; transition: color .2s, background .2s;
+}
+.pg-nav a:hover { color: #fff; background: rgba(124,77,255,.12); }
+.pg-nav a.active {
+  color: #fff; position: relative;
+}
+.pg-nav a.active::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -9px; height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--nav-accent-1), var(--nav-accent-2));
+  box-shadow: 0 8px 18px rgba(124,77,255,.35);
+}
+.pg-user {
+  display: flex; align-items: center; gap: 12px; color: var(--nav-muted); font-weight: 600; font-size: 14px;
+}
+.pg-avatar {
+  width: 28px; height: 28px; border-radius: 999px; display: grid; place-items: center;
+  background: rgba(124,77,255,.15); color: #cfd6ff; font-weight: 800; font-size: 12px;
+  border: 1px solid var(--nav-border);
+}
+/* Mobile */
+@media (max-width: 720px){
+  .pg-topbar .inner { grid-template-columns: auto auto; }
+  .pg-nav { display: none; }
+}

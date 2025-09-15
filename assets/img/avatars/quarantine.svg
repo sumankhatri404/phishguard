@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22d3ee"></stop>
+      <stop offset="1" stop-color="#6366f1"></stop>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="224" height="224" rx="28" fill="#0f172a"></rect>
+  <rect x="24" y="24" width="208" height="208" rx="24" fill="url(#g)" opacity=".18"></rect>
+  <!-- tray -->
+  <path d="M64 92h128l12 24v56a16 16 0 0 1-16 16H68a16 16 0 0 1-16-16v-56l12-24z" fill="#0b1220" stroke="#93c5fd" stroke-width="3"></path>
+  <path d="M76 116h36l10 14h12l10-14h36" fill="none" stroke="#93c5fd" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+  <!-- alert badge -->
+  <circle cx="176" cy="88" r="20" fill="#1f2937" stroke="#fca5a5" stroke-width="3"></circle>
+  <path d="M176 76v12" stroke="#fca5a5" stroke-width="4" stroke-linecap="round"></path>
+  <circle cx="176" cy="96" r="3" fill="#fca5a5"></circle>
+</svg>

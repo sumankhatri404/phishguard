@@ -1,0 +1,159 @@
+/* assets/css/intro.css */
+
+:root{
+  --bg1:#0b0f1f;
+  --panel:#0f172a;
+  --ink:#e9edfa;
+  --muted:#a8b4d7;
+  --purple:#7c4dff;
+  --purple2:#6a11cb;
+  --cyan:#5eead4;
+  --cyan2:#74f0ff;
+  --accent:#8be9fd;
+  --shadow:0 24px 80px rgba(0,0,0,.5);
+  --border:rgba(255,255,255,.08);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body.intro-body{
+  margin:0; background:
+    radial-gradient(900px 600px at 120% -10%, rgba(124,77,255,.12), transparent 60%),
+    radial-gradient(900px 600px at -20% 120%, rgba(56,189,248,.10), transparent 60%),
+    linear-gradient(180deg, #0a0e1c, #0e1430 45%, #0a0f26);
+  color:var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial;
+}
+
+/* Top window bar */
+.phish-bar{
+  height:54px; display:flex; align-items:center; justify-content:center;
+  position:sticky; top:0; z-index:10;
+  background:linear-gradient(180deg, #6c54e6, #754fe8 55%, #5e45e0);
+  border-bottom:2px solid rgba(255,255,255,.12);
+}
+.phish-bar .dots{position:absolute; left:18px; display:flex; gap:8px}
+.phish-bar .dot{width:12px;height:12px;border-radius:50%; opacity:.9; box-shadow:0 4px 10px rgba(0,0,0,.25)}
+.phish-bar .dot.red{background:#ff6b6b}
+.phish-bar .dot.yellow{background:#ffd166}
+.phish-bar .dot.green{background:#5df28b}
+.phish-bar .title{font-weight:900; letter-spacing:.4px; text-shadow:0 2px 10px rgba(0,0,0,.35)}
+.phish-bar .skip{position:absolute; right:18px; color:#fff; text-decoration:none; font-weight:800; letter-spacing:.6px}
+
+/* Layout */
+.intro-wrap{
+  max-width:1200px; margin:26px auto; padding:0 18px;
+  display:grid; grid-template-columns: 1.1fr .9fr; gap:26px;
+}
+.screen{
+  background:linear-gradient(180deg, #0e1531, #0d1a34);
+  border:1px solid var(--border);
+  border-radius:18px; padding:18px; box-shadow:var(--shadow);
+  min-height:520px; display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+}
+.canvas{position:absolute; inset:0; padding:18px; display:none; align-items:center; justify-content:center}
+.canvas.active{display:flex; animation:fade .35s ease}
+@keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+
+.monitor{width:84%; max-width:620px; aspect-ratio:16/10; position:relative; border-radius:14px;
+  background:#0b142c; box-shadow: inset 0 0 0 3px rgba(116,240,255,.35), 0 12px 50px rgba(124,77,255,.25)}
+.monitor-inner{position:absolute; inset:14px; border-radius:10px; background:#040a1a; display:grid; place-items:center}
+.monitor-bevel{position:absolute; inset:0; border-radius:14px; pointer-events:none;
+  border:3px solid rgba(116,240,255,.4); box-shadow:0 0 0 6px rgba(124,77,255,.15) inset}
+.hero-silhouette{
+  width:66%; aspect-ratio:4/3; border-radius:10px;
+  background: radial-gradient(60% 80% at 50% 40%, #1b2548 0%, #0d1634 70%, #0a1128 100%);
+  position:relative;
+}
+.hero-silhouette:after{ /* visor */
+  content:""; position:absolute; left:50%; top:46%; transform:translate(-50%,-50%);
+  width:58%; height:12%; border-radius:12px;
+  background:linear-gradient(90deg,#ffde85,#ff9e58);
+  filter:blur(0.4px); opacity:.85;
+}
+
+.inbox-card{
+  width:86%; max-width:640px; background:#0f1839; border-radius:14px;
+  border:1px solid rgba(116,240,255,.25); box-shadow:0 12px 40px rgba(0,0,0,.35);
+  overflow:hidden;
+}
+.inbox-head{
+  background:linear-gradient(180deg,#6b59e8,#5e48e0);
+  padding:12px 16px; font-weight:900; letter-spacing:.6px;
+}
+.mail-list{list-style:none; margin:0; padding:14px; display:grid; gap:12px}
+.mail-list li{
+  display:grid; grid-template-columns:36px 110px 1fr; align-items:center; gap:14px;
+  padding:10px 12px; border-radius:10px; background:rgba(255,255,255,.04);
+  border:1px solid var(--border)
+}
+.mail-list .avatar{width:36px;height:36px;border-radius:50%}
+.mail-list .avatar.a1{background:#a7f3d0}
+.mail-list .avatar.a2{background:#bae6fd}
+.mail-list .avatar.a3{background:#fde68a}
+.mail-list .from{font-weight:800}
+.mail-list .snippet{opacity:.85; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+.email-focus{
+  width:86%; max-width:640px; background:#0f1839; border-radius:14px; border:1px solid rgba(116,240,255,.25);
+  padding:16px 16px 22px; box-shadow:0 12px 40px rgba(0,0,0,.35)
+}
+.email-head{font-weight:900; margin-bottom:8px}
+.email-body{color:var(--muted); margin-bottom:14px}
+.email-cta{display:inline-block; background:#7c4dff; color:#fff; font-weight:800; padding:6px 12px; border-radius:10px}
+
+.start-card{
+  width:82%; max-width:560px; aspect-ratio:16/10; border-radius:14px; position:relative;
+  background:#050a1a; display:grid; place-items:center; box-shadow: inset 0 0 0 3px rgba(116,240,255,.35);
+}
+.phish-logo{font-size:44px; font-weight:900; letter-spacing:.5px}
+.phish-logo span{color:#5bbcff}
+.start-sub{margin-top:8px; color:#a8b4d7; font-weight:800}
+.hiscore{position:absolute; top:12px; width:100%; display:flex; justify-content:space-around; color:#a8b4d7; font-weight:800; font-size:12px}
+
+.coach{
+  position:relative; background:var(--panel); border:1px solid var(--border);
+  border-radius:18px; padding:18px; box-shadow:var(--shadow); min-height:520px;
+  display:grid; grid-template-rows:auto 1fr auto; gap:14px;
+}
+.coach-art{
+  height:160px; border-radius:14px;
+  background:
+    radial-gradient(120px 80px at 85% 30%, rgba(116,240,255,.20), transparent 60%),
+    linear-gradient(180deg,#301a5a,#1a1844);
+  position:relative;
+}
+.coach-art:after{ /* purple hooded character silhouette */
+  content:""; position:absolute; right:14px; bottom:-6px; width:140px; height:180px;
+  background:
+    radial-gradient(70px 40px at 70% 30%, rgba(255,255,255,.15), transparent 60%),
+    linear-gradient(180deg, #6b3bd8, #4e2ab8 70%, #3a2196);
+  border-radius:20px 20px 60px 60px; filter:drop-shadow(0 8px 20px rgba(124,77,255,.35));
+}
+
+.dialog{
+  background:linear-gradient(180deg, rgba(124,77,255,.08), rgba(116,240,255,.06));
+  border:1px solid rgba(116,240,255,.28);
+  border-radius:16px; padding:16px 16px 14px; position:relative;
+}
+.dialog .name{
+  position:absolute; top:-14px; left:16px; padding:4px 10px; border-radius:8px;
+  background:linear-gradient(90deg, #57e6ff, #a4f3ff);
+  color:#0b1024; font-weight:900; letter-spacing:.6px; box-shadow:0 6px 16px rgba(87,230,255,.35)
+}
+.dialog p{display:none; margin:0; color:#e9edfa; line-height:1.5}
+.dialog p.active{display:block; animation:fade .25s ease}
+
+.nav{display:flex; gap:10px; justify-content:flex-end}
+.btn{
+  border:0; padding:10px 16px; border-radius:10px; font-weight:900; cursor:pointer;
+}
+.btn.ghost{background:transparent; color:#a8b4d7; border:1px solid var(--border)}
+.btn.primary{background:linear-gradient(90deg,#6a11cb,#7c4dff); color:#fff}
+.btn.success{background:linear-gradient(90deg,#22c55e,#34d399); color:#00140c; text-decoration:none; display:inline-grid; place-items:center}
+
+/* Responsive */
+@media (max-width: 1060px){
+  .intro-wrap{grid-template-columns:1fr; gap:18px}
+  .coach-art:after{right:10px; transform:scale(.9)}
+}
