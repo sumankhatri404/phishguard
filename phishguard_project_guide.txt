@@ -1,0 +1,142 @@
+﻿PhishGuard Project Guide
+=========================
+
+1. High-Level Purpose
+---------------------
+PhishGuard is a phishing-awareness training platform that combines structured learning modules, daily practice drills, and immersive simulations. Learners sign in, complete channel-specific exercises (email, SMS, web impersonation), collect XP and badges, and compete on a leaderboard. Administrators manage content, track cohort performance, and export analytics via dedicated dashboards.
+
+2. Repository Layout
+--------------------
+- index.php – Public landing + combined login/register interface pulling live metrics.
+- dashboard.php – Authenticated learner dashboard assembling onboarding state, XP, module progress, and widgets (daily drills, streaks, badges).
+- module_mail.php / module_sms.php / module_web.php – Channel-specific training experiences with tailored UIs and case loading.
+- phishing_simulator.html & story_sim.php – Standalone browser and desktop-style simulations.
+- auth/ – Login, logout, and registration endpoints hardened by CSRF, throttling, and device tracking.
+- inc/ – Shared infrastructure: database connection, session helpers, CSRF, device fingerprinting, rate limiting, user profile helpers, reusable UI partials.
+- api/ – AJAX endpoints supporting progress tracking, daily drills, and simulators.
+- admin/ – Administrator console with its own session namespace, campaigns management, analytics, and CSV exports.
+- assets/ – CSS, JavaScript, and imagery for the learner and simulator interfaces.
+- sql/ – Base schema and seed data for deploying the platform.
+
+3. Authentication & Session Security
+------------------------------------
+*Session Bootstrapping*
+- inc/db.php sets secure session cookies (HttpOnly, SameSite=Lax, secure flag on HTTPS) before starting sessions, ensuring consistent settings across entry points.
+- Admin area uses admin/boot.php to scope cookies to the /admin path with a distinct session name (PG_ADMINSESS).
+
+*CSRF Protection*
+- inc/functions.php exposes csrf_token() and verify_csrf(), storing short-lived tokens (2 hour TTL) in the session and rotating them after successful state changes.
+- All mutating endpoints (auth/login.php, auth/register.php, api/update_progress.php, ajax_* files) call verify_csrf() and fail closed on mismatch.
+
+*Password Handling*
+- User credentials are stored as password_hash() output in users.password_hash; auth/login.php verifies with password_verify() and opportunistically rehashes if algorithms change.
+- Session fixation is mitigated with session_regenerate_id(true) on successful login for both learner and admin spaces.
+
+*Device & Abuse Controls*
+- inc/device.php issues long-lived, salted device cookies, hashes them before database storage, and binds devices to user IDs to prevent duplicate registrations.
+- inc/rate_limit.php implements a lightweight per-IP/UA throttle stored in rate_limits, capping login attempts (5 per 10 min) and registrations (3 per hour) via pg_rate_limit().
+
+4. Data Model Highlights (sql/database.sql)
+-------------------------------------------
+- users: Primary identity record with unique username, hashed password, and timestamps.
+- training_modules: Metadata for each module (title, description, difficulty, channel, imagery, optional dedicated case table).
+- user_training_progress: Per-learner per-module progress percent, status, start/completion timestamps.
+- user_xp: XP ledger keyed by (user_id, module_id). The application code also supports legacy user_points.
+- training_mail_cases / training_sms_cases / training_web_cases: Pools of interactive scenarios with prompt content, answer keys, scoring, and optional assets.
+- phish_forwarded_emails & phish_expected_answers: Rich email artifacts and expected rubric for advanced "help desk" analysis tasks.
+- Spot-the-Phish tables (spot_tasks, user_spot_daily, user_spot_sessions) power the daily drills with deterministic daily selection and locking.
+- Supporting tables for gamification: user_streaks, user_rewards, user_badges, training_*_progress logs, devices, rate_limits, test_attempts.
+
+5. Learner Workflow
+-------------------
+1. Access index.php: Users see metrics (total users, modules, badges) and tabs for login/register. pg.js stabilizes mobile viewport and tab underline.
+2. Authenticate: auth/login.php validates credentials, handles throttling, rotates CSRF, binds device, then redirects to dashboard.php.
+3. Dashboard Experience (dashboard.php):
+   - Fetches onboarding flags (consent and pretest) to show modal prompts.
+   - Calculates XP, streaks, and level via pg_update_user_level() and XP queries.
+   - Aggregates per-module progress by counting completed cases in training_mail_progress, training_sms_progress, simulator completions, etc.
+   - Shows daily Spot-the-Phish tasks (rendered via ajax_spot_list.php) and recent achievements.
+4. Module Engagement:
+   - module_mail.php: Renders inbox-style case list, forwarded email viewer, answer dropdowns, and progress API calls.
+   - module_sms.php: Simulates a messaging app with typing indicator, contextual hints, and progress tracking.
+   - module_web.php: Lists phishing website cases, linking to website_impersonation.php sandbox and updating training_web_progress.
+5. Simulations:
+   - phishing_simulator.html: Static templates replicating phishing websites for learners to inspect.
+   - story_sim.php + assets/js/story_sim.js: Desktop OS-style missions (terminal, scanner, logs) to practice broader incident response.
+6. Gamification & Feedback:
+   - XP increments recorded in user_xp; dashboard recalculates levels and badges.
+   - Leaderboard (leaderboard.php) aggregates XP across cohort, normalizes level info, and surfaces badges.
+   - Daily drills lock after completion/expiration until midnight to encourage frequent practice.
+
+6. API & AJAX Endpoints (api/ and ajax_*.php)
+--------------------------------------------
+- api/update_progress.php: Receives module/step info, calculates percent, and updates user_training_progress while enforcing CSRF.
+- api/submit_analysis.php: Grades help-request responses, stores attempts, awards XP, and bumps module progress.
+- api/web_* (progress, award, finish_level): Track website simulator state, award points, and unlock follow-up content.
+- ajax_spot_list.php / ajax_spot_submit.php / ajax_spot_open.php: Manage the Spot-the-Phish daily flow (task selection, locking, scoring, unlock timers).
+- ajax_progress.php, ajax_daily_partial.php, etc.: Provide partial HTML or JSON fragments for dashboard widgets, progress bars, consent modals.
+
+7. Admin Console (admin/)
+-------------------------
+- boot.php: Centralizes admin session scope, DB connection, CSRF tokens, and helper includes.
+- login.php/logout.php: Dedicated auth for admin accounts (users.role = 'admin'), leveraging shared password hashing but separate session cookie.
+- index.php: Analytics home showing paired pre/post-test trends, computed deltas, and statistical significance via custom t-distribution functions.
+- campaigns.php: CRUD interface for training modules and associated case pools; ensures schema columns exist (tm_bootstrap, cases_bootstrap).
+- reports.php/user.php/user_profile.php: Drill into learner progress, XP history, badges, and activity logs.
+- export_* scripts: Generate CSV reports for paired scores, test attempts, or user data to share with stakeholders.
+
+8. Frontend Assets
+------------------
+- assets/css/pg.css: Base theme (neon gradients, rounded cards), used by login, dashboard, and modules.
+- assets/js/pg.js: Viewport fix, tab controller, underline animation; ensures accessibility of login/register toggle.
+- assets/js/module_mail.js & mail_sim.js: Wiring for fetching case details, managing dropdowns, showing explanations after submission.
+- assets/js/story_sim.js: Large state machine for the HackerOS simulation (virtual filesystem, mission steps, radio scanning, log panel).
+- assets/css/story_sim.css: Styling for the terminal-like environment, floating action buttons, and dock.
+
+9. Key Helper Functions
+-----------------------
+- pg_tbl_exists / pg_col_exists (inc/functions.php): Safely probe schema differences to support multiple deployment states.
+- pg_bump_streak & pg_ensure_xp_triggers (inc/functions.php): Maintain user_streaks table and ensure MySQL triggers keep streaks in sync with XP gains.
+- pg_default_reg_throttle_key (inc/rate_limit.php): Builds consistent throttle key from IP, user agent, and request URI.
+- getCasesTableForModule (inc/cases_table.php): Resolves whether a module uses default pools or a dedicated cases table, sanitizing table names.
+- admin_base (admin/boot.php): Computes base path to support installations in subdirectories and ensures cookie scoping.
+
+10. Deployment & Configuration Notes
+------------------------------------
+- Database credentials live in inc/db.php and admin/boot.php; rotate the password and update constants before production use.
+- Change PG_DEVICE_SALT in inc/device.php to a unique, random string per deployment to secure device token hashing.
+- Ensure sql/database.sql (and any migrations under sql/) are applied before first run to create required tables.
+- Enforce HTTPS so secure session cookies (secure=true) function correctly and to protect credentials in transit.
+- Consider moving hard-coded secrets (DB credentials, salts) into environment variables or a server-side config file.
+
+11. Viva Presentation Tips
+--------------------------
+- Demonstrate the learner flow end-to-end: login, dashboard overview, open email module, complete a case, observe XP and streak updates, check leaderboard.
+- Highlight security hardening: CSRF tokens, rate limiting, password hashing, device binding. Reference inc/functions.php, inc/rate_limit.php, and inc/device.php.
+- Explain data flow: how module metadata and cases from training_modules and training_mail_cases pair with progress tables and XP ledger.
+- Discuss pedagogical design: daily drills via ajax_spot_list.php, simulations (story_sim.php) for practical reinforcement, and analytics (admin/index.php) for measuring impact.
+- Prepare to answer deployment and maintenance questions (schema migrations, rotating secrets, adjusting throttle limits).
+
+Appendix: File Quick Reference
+------------------------------
+Core entry points:
+- index.php
+- dashboard.php
+- training.php, story_sim.php, phishing_simulator.html
+- module_mail.php, module_sms.php, module_web.php
+
+Shared infrastructure:
+- inc/db.php, inc/functions.php, inc/device.php, inc/rate_limit.php, inc/user.php, inc/cases_table.php, inc/app_topbar.php
+
+Authentication:
+- auth/login.php, auth/register.php, auth/logout.php
+
+APIs/AJAX:
+- api/update_progress.php, api/submit_analysis.php, api/web_progress.php, ajax_spot_list.php, ajax_spot_submit.php, ajax_progress.php, ajax_daily_partial.php
+
+Admin:
+- admin/boot.php, admin/index.php, admin/campaigns.php, admin/reports.php, admin/user.php, admin/user_profile.php, admin/export_*.php
+
+Simulations & assets:
+- assets/js/pg.js, assets/js/mail_sim.js, assets/js/module_mail.js, assets/js/story_sim.js, assets/css/pg.css, assets/css/story_sim.css
+- sql/database.sql (schema + seeds)
